@@ -6,4 +6,4 @@
 
 ### 启用方法
 
-#### git clone至plugins文件夹下，后台启用并进入设置打开即可。
+#### git clone至plugins文件夹下并修改文件名为ExImg，后台启用并进入设置打开即可。
