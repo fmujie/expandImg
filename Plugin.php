@@ -61,6 +61,7 @@ class ExImg_Plugin implements Typecho_Plugin_Interface
             'rgba(0,0,123,0.4)' => _t('幻影紫'),
             'rgba(160,238,225,0.4)' => _('纯净绿'),
             'rgba(236,173,158,0.4)' => _t('暖心红'),
+            'rgba(145,196,255,0.4)' => _t('天空蓝'),
         ];
         $expandImgBgType = new Typecho_Widget_Helper_Form_Element_Radio('expandImgBgType', $imgBgOptions, 'rgba(0,0,123,0.4)', _t('图片双击放大后的背景颜色，默认幻影紫(启用图片放大后生效)'));
         $form->addInput($expandImgBgType);
