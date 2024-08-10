@@ -8,7 +8,7 @@ if (!defined('__TYPECHO_ROOT_DIR__')) {
  *
  * @package ExImg
  * @author fmujie
- * @version 1.0.0
+ * @version 1.0.1
  * @link https://blog.fmujie.cn
  */
 class ExImg_Plugin implements Typecho_Plugin_Interface
@@ -50,20 +50,27 @@ class ExImg_Plugin implements Typecho_Plugin_Interface
         $imgOptions = [
             'default' => _t('关闭'),
             'moderate_enlarged' => _t('较小'),
-            'larger_enlarged' => _('适中'),
+            'larger_enlarged' => _t('适中'),
             'largest_enlarged' => _t('较大'),
         ];
-        $expandImgType = new Typecho_Widget_Helper_Form_Element_Radio('expandImgType', $imgOptions, 'default', _t('图片双击放大效果，默认关闭'));
+        $expandImgType = new Typecho_Widget_Helper_Form_Element_Radio('expandImgType', $imgOptions, 'default', _t('图片放大效果, 默认关闭'));
         $form->addInput($expandImgType);
+
+        $clickOptions = [
+            "dbclick" => _t('双击'),
+            "click" => _t('单击')
+        ];
+        $clickType = new Typecho_Widget_Helper_Form_Element_Radio('clickType', $clickOptions, 'click', _t('触发条件: 默认单击'));
+        $form->addInput($clickType);
 
         //imagesExpandBg选择
         $imgBgOptions = [
             'rgba(0,0,123,0.4)' => _t('幻影紫'),
-            'rgba(160,238,225,0.4)' => _('纯净绿'),
+            'rgba(160,238,225,0.4)' => _t('纯净绿'),
             'rgba(236,173,158,0.4)' => _t('暖心红'),
             'rgba(145,196,255,0.4)' => _t('天空蓝'),
         ];
-        $expandImgBgType = new Typecho_Widget_Helper_Form_Element_Radio('expandImgBgType', $imgBgOptions, 'rgba(0,0,123,0.4)', _t('图片双击放大后的背景颜色，默认幻影紫(启用图片放大后生效)'));
+        $expandImgBgType = new Typecho_Widget_Helper_Form_Element_Radio('expandImgBgType', $imgBgOptions, 'rgba(0,0,123,0.4)', _t('图片放大后的背景颜色, 默认幻影紫(启用图片放大后生效)'));
         $form->addInput($expandImgBgType);
     }
 
@@ -109,13 +116,14 @@ class ExImg_Plugin implements Typecho_Plugin_Interface
     {
         $expandImgType = Typecho_Widget::widget('Widget_Options')->plugin('ExImg')->expandImgType;
         $expandImgBgType = Typecho_Widget::widget('Widget_Options')->plugin('ExImg')->expandImgBgType;
+        $clickType = Typecho_Widget::widget('Widget_Options')->plugin('ExImg')->clickType;
         if ($expandImgType != 'default') {
-            self::handleImgExType($expandImgType, $expandImgBgType);
+            self::handleImgExType($expandImgType, $expandImgBgType, $clickType);
         }
     }
 
     /*imgExpandType*/
-    private static function handleImgExType($expandImgType, $expandImgBgType)
+    private static function handleImgExType($expandImgType, $expandImgBgType, $clickType)
     {
         switch ($expandImgType) {
             case 'moderate_enlarged':
@@ -134,11 +142,12 @@ class ExImg_Plugin implements Typecho_Plugin_Interface
         $js .= '<script>';
         $js .= <<<JS
         $(document).ready(function () {
-            $(document).dblclick(function (e) {
-                var elment = $(e.target)
-                var tagName = elment.prop('tagName')
-                if(tagName == 'IMG') {
-                    imgSrc = elment.attr('src')
+            var eventType = "{$clickType}";
+            var showImage = function(e) {
+                var element = $(e.target);
+                var tagName = element.prop('tagName');
+                if (tagName == 'IMG') {
+                    var imgSrc = element.attr('src');
                     swal({
                         width: {$imgWidth},
                         padding: 20,
@@ -146,10 +155,18 @@ class ExImg_Plugin implements Typecho_Plugin_Interface
                         imageClass: '{$expandImgType}',
                         backdrop: '{$expandImgBgType}',
                         showConfirmButton: false,
-                    })
+                        showCloseButton: true,
+                    });
                 }
-            });
+            };
+
+            if (eventType == 'click') {
+                $(document).click(showImage);
+            } else {
+                $(document).dblclick(showImage);
+            }
         });
+
 JS;
         $js .= '</script>';
         echo $js;
