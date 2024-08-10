@@ -9,3 +9,9 @@
 .largest_enlarged {
     width: 1200px;
 }
+
+/* 鼠标悬停在图片上时 */
+img:hover {
+    cursor: pointer; /* 设置鼠标悬停时显示小手 */
+    transform: scale(1.03); /* 轻微放大图片 */
+}
